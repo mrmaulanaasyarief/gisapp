@@ -25,6 +25,13 @@
     {{-- cdn leaflet search --}}
     <link rel="stylesheet" href=" https://cdnjs.cloudflare.com/ajax/libs/leaflet-search/3.0.9/leaflet-search.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-search/3.0.9/leaflet-search.src.js"></script>
+    
+    {{-- cdn leaflet clustering --}}
+    <link rel="stylesheet" href=" https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css">
+    <link rel="stylesheet" href=" https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css">
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    
+
 
 
     <style>
@@ -80,6 +87,30 @@
                 tileSize: 512,
                 zoomOffset: -1,
                 attribution: mbAttr
+            }),
+            google_streets = L.tileLayer('http://{s}.google.com/vt?lyrs=m&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                minZoom: 4,
+                noWrap: true,
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+            }),
+            google_hybrid = L.tileLayer('http://{s}.google.com/vt?lyrs=s,h&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                minZoom: 4,
+                noWrap: true,
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+            }),
+            google_satellite = L.tileLayer('http://{s}.google.com/vt?lyrs=s&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                minZoom: 4,
+                noWrap: true,
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+            }),
+            google_terrain = L.tileLayer('http://{s}.google.com/vt?lyrs=p&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                minZoom: 4,
+                noWrap: true,
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
             });
 
         var map = L.map('map', {
@@ -92,23 +123,22 @@
         var baseLayers = {
             "Grayscale": dark,
             "Satellite": satellite,
-            "Streets": streets
+            "Streets": streets,
+            "Google Streets": google_streets,
+            "Google Hybrid": google_hybrid,
+            "Google Satellite": google_satellite,
+            "Google Terrain": google_terrain,
         };
 
         var overlays = {
             "Streets": streets,
             "Grayscale": dark,
             "Satellite": satellite,
+            "Google Streets": google_streets,
+            "Google Hybrid": google_hybrid,
+            "Google Satellite": google_satellite,
+            "Google Terrain": google_terrain,
         };
-
-        // Menampilkan popup data ketika marker di klik 
-        @foreach ($spaces as $item)
-            L.marker([{{ $item->location }}])
-                .bindPopup(
-                    "<div class='my-2'><strong>Coordinate:</strong> <br>{{ $item->location }}</div>" +
-                    "<div class='my-2'></div>"
-                ).addTo(map);
-        @endforeach
 
         var datas = [
             @foreach ($spaces as $key => $value)
@@ -120,8 +150,7 @@
         ];
 
         // pada koding ini kita menambahkan control pencarian data        
-        var markersLayer = new L.LayerGroup();
-        map.addLayer(markersLayer);
+        var markersLayer = new L.markerClusterGroup();
         var controlSearch = new L.Control.Search({
             position: 'topleft',
             layer: markersLayer,
@@ -133,7 +162,7 @@
 
         //menambahkan variabel controlsearch pada addControl
         map.addControl(controlSearch);
-
+        
         // looping variabel datas utuk menampilkan data space ketika melakukan pencarian data
         for (i in datas) {
 
@@ -141,18 +170,14 @@
                 loc = datas[i].loc,
                 marker = new L.Marker(new L.latLng(loc), {
                     title: title
-                });
+                }).bindPopup(
+                    "<div class='my-2'><strong>Coordinate:</strong> <br>"+loc+"</div>"
+                );
             markersLayer.addLayer(marker);
-
-            // melakukan looping data untuk memunculkan popup dari space yang dipilih
-            @foreach ($spaces as $item)
-                L.marker([{{ $item->location }}])
-                    .bindPopup(
-                        "<div class='my-2'><strong>Coordinate:</strong> <br>{{ $item->location }}</div>" +
-                        "<div class='my-2'></div>"
-                    ).addTo(map);
-            @endforeach
         }
+
+        map.addLayer(markersLayer);
+
         L.control.layers(baseLayers, overlays).addTo(map);
     </script>
 </body>
