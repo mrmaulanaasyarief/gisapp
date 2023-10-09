@@ -21,23 +21,5 @@ class MapController extends Controller
             'spaces' => $spaces,
             'centrePoint' => $centrePoint
         ]);
-        //return dd($spaces);
-    }
-
-    public function show($slug)
-    {
-        /**
-         * Hampir sama dengam method index diatas
-         * tapi disini kita hanya akan menampilkan single data saja untuk space
-         * yang kita pilih pada view map dan selanjutnya kita akan di arahkan 
-         * ke halaman detail untuk melihat informasi lebih lengkap dari space
-         * yang kita pilih
-         */
-        $centrePoint = CentrePoint::get()->first();
-        $spaces = Space::where('slug',$slug)->first();
-        return view('detail',[
-            'centrePoint' => $centrePoint,
-            'spaces' => $spaces
-        ]);
     }
 }
